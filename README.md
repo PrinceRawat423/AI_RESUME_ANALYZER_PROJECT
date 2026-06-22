@@ -1,45 +1,30 @@
-# AI Resume Analyzer & Interview Coach
+# AI Resume Analyzer Project
 
-## Requirements
+This repository contains two runnable versions of the project:
 
-- Node.js 18 or newer
-- MongoDB running locally or a MongoDB Atlas URI
-- Gemini API key if you want AI-generated suggestions and interview answers
+- `App/App.py` - a Streamlit version that matches the original GitHub repo closely
+- `frontend/` and `backend/` - the React + Node version
 
-## Setup
+## Streamlit Version
 
-1. Open a terminal in the `ai-resume-analyzer` folder.
-2. Install all dependencies from the root:
-   `npm install`
-3. Create backend `.env` file inside `backend/`:
-   `PORT=5000`
-   `MONGODB_URI=mongodb://127.0.0.1:27017/ai_resume_analyzer`
-   `JWT_SECRET=your_secret_key`
-   `GEMINI_API_KEY=your_gemini_api_key`
-4. Create frontend `.env` file inside `frontend/`:
-   `VITE_API_BASE_URL=http://localhost:5000/api`
-5. Start both backend and frontend together:
-   `npm run dev`
+Run from `App/`:
 
-## Open in Browser
+```bash
+pip install -r requirements.txt
+streamlit run App.py
+```
 
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:5000`
+## React + Node Version
 
-## Features
+Run from the repository root:
 
-- Register and login with JWT
-- Upload PDF resumes
-- Extract resume text with `pdf-parse`
-- ATS scoring
-- Skill extraction
-- Missing skill suggestions
-- Interview questions
-- AI chatbot
-- Analysis history
+```bash
+npm install
+npm run dev
+```
 
-## Folder Structure
+## Notes
 
-- `frontend/` React app
-- `backend/` Express API
-- `backend/uploads/` saved PDFs
+- `backend/.env` and `frontend/.env` are local-only and ignored by git
+- MongoDB is used for the Node version
+- MySQL support is included in the Streamlit version for parity with the original project
