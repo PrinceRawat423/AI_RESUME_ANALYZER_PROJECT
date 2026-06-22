@@ -1,0 +1,11 @@
+streamlit
+pandas
+plotly
+Pillow
+geopy
+geocoder
+PyMySQL
+pdfminer.six
+pyresparser
+streamlit-tags
+nltk
