@@ -1,4 +1,5 @@
 const Feedback = require('../models/Feedback');
+const demoStore = require('../services/demoStore');
 
 exports.submitFeedback = async (req, res) => {
   try {
@@ -8,12 +9,15 @@ exports.submitFeedback = async (req, res) => {
       return res.status(400).json({ message: 'Name, email, and rating are required' });
     }
 
-    const feedback = await Feedback.create({
+    const feedbackValues = {
       name,
       email,
       score: Number(score),
       comments,
-    });
+    };
+    const feedback = demoStore.databaseConnected()
+      ? await Feedback.create(feedbackValues)
+      : demoStore.saveFeedback(feedbackValues);
 
     res.status(201).json({
       message: 'Feedback submitted successfully',
@@ -26,7 +30,9 @@ exports.submitFeedback = async (req, res) => {
 
 exports.getFeedbackHistory = async (req, res) => {
   try {
-    const feedback = await Feedback.find().sort({ createdAt: -1 });
+    const feedback = demoStore.databaseConnected()
+      ? await Feedback.find().sort({ createdAt: -1 })
+      : demoStore.feedbackHistory();
     res.json({ feedback });
   } catch (error) {
     res.status(500).json({ message: error.message });

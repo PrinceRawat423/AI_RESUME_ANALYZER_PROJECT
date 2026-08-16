@@ -185,6 +185,10 @@ VITE_API_BASE_URL=http://localhost:5000/api
 
 Never commit the real `.env` files. The repository includes `.env.example` files instead.
 
+### Demo mode without MongoDB
+
+If `MONGODB_URI` is omitted or MongoDB is temporarily unavailable, the backend starts in **temporary demo mode**. Uploads, resume analysis, and feedback continue to work for the running server, but the data is kept only in memory and is cleared when the backend restarts. Configure MongoDB for persistent resumes, analyses, feedback, and user accounts.
+
 ## Project Structure
 
 ```text

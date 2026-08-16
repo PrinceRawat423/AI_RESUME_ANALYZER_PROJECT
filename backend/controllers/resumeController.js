@@ -8,6 +8,7 @@ const { extractSkills } = require('../services/skillExtractor');
 const { calculateATSScore } = require('../services/atsService');
 const { generateInsights, generateInterviewQuestions } = require('../services/geminiService');
 const { buildResumeProfile } = require('../services/resumeProfile');
+const demoStore = require('../services/demoStore');
 
 async function parsePdf(filePath) {
   const buffer = await fs.readFile(filePath);
@@ -28,13 +29,16 @@ exports.uploadResume = async (req, res) => {
       return res.status(400).json({ message: 'Only PDF files are allowed' });
     }
 
-    const resume = await Resume.create({
+    const resumeValues = {
       userId: req.user?.id || null,
       originalName: req.file.originalname,
       storedName: req.file.filename,
       filePath: req.file.path,
       mimeType: req.file.mimetype,
-    });
+    };
+    const resume = demoStore.databaseConnected()
+      ? await Resume.create(resumeValues)
+      : demoStore.saveResume(resumeValues);
 
     res.status(201).json({
       message: 'Resume uploaded successfully',
@@ -51,11 +55,16 @@ exports.analyzeResume = async (req, res) => {
     const jobDescription = req.body.jobDescription || '';
     const userFilter = req.user?.id ? { userId: req.user.id } : {};
 
+    const databaseConnected = demoStore.databaseConnected();
     let resume = null;
-    if (resumeId) {
-      resume = await Resume.findById(resumeId);
+    if (databaseConnected) {
+      resume = resumeId
+        ? await Resume.findById(resumeId)
+        : await Resume.findOne(userFilter).sort({ createdAt: -1 });
     } else {
-      resume = await Resume.findOne(userFilter).sort({ createdAt: -1 });
+      resume = resumeId
+        ? demoStore.findResume(resumeId, req.user?.id)
+        : demoStore.latestResume(req.user?.id);
     }
 
     if (!resume) {
@@ -88,7 +97,7 @@ exports.analyzeResume = async (req, res) => {
       resumeProfile.mobileNumber = req.body.mobile || resumeProfile.mobileNumber;
     }
 
-    const analysis = await Analysis.create({
+    const analysisValues = {
       userId: req.user?.id || null,
       resumeId: resume._id,
       resumeText,
@@ -110,9 +119,16 @@ exports.analyzeResume = async (req, res) => {
       resumeTips: resumeProfile.resumeTips,
       resumeVideos: resumeProfile.resumeVideos,
       interviewVideos: resumeProfile.interviewVideos,
-    });
+    };
+    const analysis = databaseConnected
+      ? await Analysis.create(analysisValues)
+      : demoStore.saveAnalysis(analysisValues);
 
-    await Resume.findByIdAndUpdate(resume._id, { extractedText: resumeText });
+    if (databaseConnected) {
+      await Resume.findByIdAndUpdate(resume._id, { extractedText: resumeText });
+    } else {
+      demoStore.updateResume(resume._id, { extractedText: resumeText });
+    }
 
     res.json({
       message: 'Resume analyzed successfully',
@@ -127,9 +143,11 @@ exports.analyzeResume = async (req, res) => {
 
 exports.getHistory = async (req, res) => {
   try {
-    const history = await Analysis.find(req.user?.id ? { userId: req.user.id } : {})
-      .populate('resumeId')
-      .sort({ createdAt: -1 });
+    const history = demoStore.databaseConnected()
+      ? await Analysis.find(req.user?.id ? { userId: req.user.id } : {})
+        .populate('resumeId')
+        .sort({ createdAt: -1 })
+      : demoStore.analysisHistory(req.user?.id);
 
     res.json({ history });
   } catch (error) {
@@ -139,9 +157,11 @@ exports.getHistory = async (req, res) => {
 
 exports.getLatestAnalysis = async (req, res) => {
   try {
-    const analysis = await Analysis.findOne(req.user?.id ? { userId: req.user.id } : {})
-      .populate('resumeId')
-      .sort({ createdAt: -1 });
+    const analysis = demoStore.databaseConnected()
+      ? await Analysis.findOne(req.user?.id ? { userId: req.user.id } : {})
+        .populate('resumeId')
+        .sort({ createdAt: -1 })
+      : demoStore.latestAnalysis(req.user?.id);
 
     if (!analysis) {
       return res.status(404).json({ message: 'No analysis found' });
