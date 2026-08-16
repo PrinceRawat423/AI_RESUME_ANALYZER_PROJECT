@@ -333,7 +333,7 @@ export default function App() {
                     className="control"
                     value={candidateForm.mobile}
                     onChange={(event) => setCandidateForm((prev) => ({ ...prev, mobile: event.target.value }))}
-                    placeholder="Mobile number or short note"
+                    placeholder="Mobile number"
                   />
                 </label>
                 <label className="field">
