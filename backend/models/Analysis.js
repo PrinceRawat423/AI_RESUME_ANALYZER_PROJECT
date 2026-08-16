@@ -6,6 +6,7 @@ const analysisSchema = new mongoose.Schema(
     resumeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Resume' },
     resumeText: { type: String, default: '' },
     atsScore: { type: Number, default: 0 },
+    scoreBreakdown: { type: Object, default: {} },
     matchedSkills: { type: [String], default: [] },
     missingSkills: { type: [String], default: [] },
     suggestions: { type: [String], default: [] },

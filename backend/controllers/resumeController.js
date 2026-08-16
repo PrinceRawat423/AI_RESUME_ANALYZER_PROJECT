@@ -55,6 +55,10 @@ exports.analyzeResume = async (req, res) => {
     const jobDescription = req.body.jobDescription || '';
     const userFilter = req.user?.id ? { userId: req.user.id } : {};
 
+    if (!jobDescription.trim()) {
+      return res.status(400).json({ message: 'Please paste a job description to calculate an ATS compatibility score.' });
+    }
+
     const databaseConnected = demoStore.databaseConnected();
     let resume = null;
     if (databaseConnected) {
@@ -102,6 +106,7 @@ exports.analyzeResume = async (req, res) => {
       resumeId: resume._id,
       resumeText,
       atsScore: ats.score,
+      scoreBreakdown: ats.scoreBreakdown,
       matchedSkills: ats.matchedSkills,
       missingSkills: ats.missingSkills,
       suggestions,

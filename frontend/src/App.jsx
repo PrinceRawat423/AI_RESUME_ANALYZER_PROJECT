@@ -126,6 +126,7 @@ export default function App() {
   const uploadsBase = getBaseUrl();
   const pdfUrl = latestResume?.storedName ? `${uploadsBase}/uploads/${encodeURIComponent(latestResume.storedName)}` : '';
   const atsScore = analysis?.analysis?.atsScore ?? 0;
+  const scoreBreakdown = analysis?.analysis?.scoreBreakdown || null;
   const matchedSkills = analysis?.analysis?.matchedSkills || [];
   const missingSkills = analysis?.analysis?.missingSkills || [];
   const suggestions = analysis?.analysis?.suggestions || [];
@@ -185,6 +186,11 @@ export default function App() {
   const handleAnalyze = async () => {
     if (!file) {
       setStatus('Please select a PDF resume first.');
+      return;
+    }
+
+    if (!jobDescription.trim()) {
+      setStatus('Please paste the job description to calculate an ATS compatibility score.');
       return;
     }
 
@@ -306,7 +312,7 @@ export default function App() {
             <Section
               title="Upload Your Resume, And Get Smart Recommendations"
               subtitle="The resume is parsed, scored, and mapped to a suggested field, skills, courses, and interview prompts."
-              action={<div className="score-badge"><span>ATS Score</span><strong>{atsScore}%</strong></div>}
+              action={<div className="score-badge"><span>ATS Compatibility</span><strong>{atsScore}%</strong></div>}
             >
               <div className="form-grid">
                 <label className="field">
@@ -346,13 +352,13 @@ export default function App() {
                   />
                 </label>
                 <label className="field field-wide">
-                  <span>Job description</span>
+                  <span>Job description*</span>
                   <textarea
                     className="control textarea"
                     rows="4"
                     value={jobDescription}
                     onChange={(event) => setJobDescription(event.target.value)}
-                    placeholder="Optional job description to improve matching..."
+                    placeholder="Paste the target role's job description for ATS compatibility scoring..."
                   />
                 </label>
               </div>
@@ -373,6 +379,21 @@ export default function App() {
               <StatCard label="Predicted Field" value={profile.predictedField} hint="Based on detected skills" />
               <StatCard label="Matched Skills" value={matchedSkills.length} hint="Found in the resume text" />
             </div>
+
+            {scoreBreakdown ? (
+              <Section
+                title="ATS Compatibility Breakdown"
+                subtitle="A transparent, role-specific score based on the uploaded resume and job description."
+              >
+                <div className="stats-grid">
+                  <StatCard label="Job Skills" value={`${scoreBreakdown.skillCoverage || 0}/60`} hint={`${matchedSkills.length} of ${scoreBreakdown.jobSkillCount || 0} detected skills matched`} />
+                  <StatCard label="Resume Sections" value={`${scoreBreakdown.sectionCoverage || 0}/15`} hint="Summary, experience, education, skills, projects" />
+                  <StatCard label="Contact Details" value={`${scoreBreakdown.contactScore || 0}/8`} hint="Email and phone detected" />
+                  <StatCard label="Measurable Results" value={`${scoreBreakdown.impactScore || 0}/7`} hint="Metrics such as percentages and years" />
+                  <StatCard label="Readability" value={`${scoreBreakdown.readabilityScore || 0}/10`} hint="Resume text length and parseability" />
+                </div>
+              </Section>
+            ) : null}
 
             <div className="two-col">
               <Section title="Resume Preview" subtitle="Uploaded file preview if the PDF is accessible from the backend.">

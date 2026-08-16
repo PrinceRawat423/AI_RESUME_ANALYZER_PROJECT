@@ -66,9 +66,18 @@ function normalize(text) {
   return String(text || '').toLowerCase();
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function containsSkill(text, skill) {
+  const pattern = escapeRegExp(skill.toLowerCase());
+  return new RegExp(`(^|[^a-z0-9+#])${pattern}(?=$|[^a-z0-9+#])`, 'i').test(text);
+}
+
 function extractSkills(text = '') {
   const source = normalize(text);
-  return skillLibrary.filter((skill) => source.includes(skill.toLowerCase()));
+  return skillLibrary.filter((skill) => containsSkill(source, skill));
 }
 
 module.exports = { extractSkills, skillLibrary };

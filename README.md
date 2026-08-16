@@ -55,7 +55,7 @@ flowchart LR
 2. The backend stores the file metadata and extracts PDF text using `pdf-parse`.
 3. A curated skill library scans both the resume text and job description for explicit keywords.
 4. The ATS service compares both sets of skills and returns matched and missing skills.
-5. The service calculates a score from job-skill coverage, resume length, and common resume sections.
+5. The service calculates a transparent ATS compatibility score from job-skill coverage (60 points), resume sections (15), contact details (8), measurable achievements (7), and resume readability (10).
 6. The backend saves the analysis in MongoDB and returns it to the React dashboard.
 7. If `GEMINI_API_KEY` is configured, Gemini creates personalized suggestions, interview questions, and coach responses. Otherwise, deterministic fallback text is used.
 
@@ -86,7 +86,7 @@ React dashboard
 The core resume scoring is **not a trained machine-learning model**. It is deterministic and explainable:
 
 - `skillExtractor.js` uses case-insensitive keyword matching against a curated skill library.
-- `atsService.js` scores job-skill coverage (up to 70 points), resume length (up to 20), and presence of `experience`, `education`, and `skills` sections (up to 9).
+- `atsService.js` calculates a job-description-based compatibility score: skill coverage (up to 60), resume sections (15), contact details (8), measurable achievements (7), and readability (10).
 - `resumeProfile.js` uses rules and regular expressions for contact details, degree, field, and experience-level extraction.
 
 Gemini is an **optional LLM integration** in `geminiService.js`. When an API key exists, it produces personalized improvement suggestions, interview questions, and coach-chat answers. When no key is configured, the app returns predefined fallback guidance.
