@@ -1,21 +1,31 @@
-const { skillLibrary } = require('./skillExtractor');
+const { extractSkills } = require('./skillExtractor');
 
 function calculateATSScore({ resumeText = '', extractedSkills = [], jobDescription = '' }) {
   const resumeLength = resumeText.trim().split(/\s+/).filter(Boolean).length;
-  const text = `${resumeText} ${jobDescription}`.toLowerCase();
+  const hasJobDescription = jobDescription.trim().length > 0;
+  const jobSkills = extractSkills(jobDescription);
+  const matchedSkills = hasJobDescription
+    ? extractedSkills.filter((skill) => jobSkills.some((jobSkill) => jobSkill.toLowerCase() === skill.toLowerCase()))
+    : extractedSkills;
+  const missingSkills = hasJobDescription
+    ? jobSkills.filter((skill) => !extractedSkills.some((resumeSkill) => resumeSkill.toLowerCase() === skill.toLowerCase()))
+    : [];
 
-  const matchedSkills = extractedSkills.filter((skill) => text.includes(skill.toLowerCase()));
-  const missingSkills = skillLibrary.filter((skill) => !text.includes(skill.toLowerCase())).slice(0, 8);
-
-  const skillCoverage = Math.min(70, matchedSkills.length * 8);
+  // With a JD, score the overlap against skills requested by the role. Without
+  // one, the score remains a resume-quality heuristic rather than a job match.
+  const skillCoverage = hasJobDescription && jobSkills.length
+    ? Math.round((matchedSkills.length / jobSkills.length) * 70)
+    : Math.min(70, extractedSkills.length * 8);
   const structureScore = resumeLength > 250 ? 20 : resumeLength > 100 ? 12 : 6;
-  const sectionScore = ['experience', 'education', 'skills'].filter((word) => text.includes(word)).length * 3;
+  const resumeLowercase = resumeText.toLowerCase();
+  const sectionScore = ['experience', 'education', 'skills'].filter((word) => resumeLowercase.includes(word)).length * 3;
   const score = Math.min(100, skillCoverage + structureScore + sectionScore);
 
   return {
     score,
     matchedSkills,
     missingSkills,
+    jobSkills,
   };
 }
 

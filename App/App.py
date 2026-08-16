@@ -12,6 +12,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from dotenv import load_dotenv
 from geopy.geocoders import Nominatim
 from pdfminer.high_level import extract_text
 from PIL import Image
@@ -39,6 +40,7 @@ except Exception:
 from Courses import android_course, ds_course, interview_videos, ios_course, resume_videos, uiux_course, web_course
 
 APP_DIR = Path(__file__).resolve().parent
+load_dotenv(APP_DIR / ".env")
 UPLOAD_DIR = APP_DIR / "Uploaded_Resumes"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -91,7 +93,7 @@ def get_connection():
         return pymysql.connect(
             host=os.getenv("MYSQL_HOST", "localhost"),
             user=os.getenv("MYSQL_USER", "root"),
-            password=os.getenv("MYSQL_PASSWORD", "root@MySQL4admin"),
+            password=os.getenv("MYSQL_PASSWORD", ""),
             db=os.getenv("MYSQL_DB", "cv"),
         )
     except Exception:
