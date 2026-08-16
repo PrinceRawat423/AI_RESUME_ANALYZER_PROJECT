@@ -30,7 +30,7 @@ function formatDate(value) {
 }
 
 function getBaseUrl() {
-  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
   return apiBase.replace(/\/api\/?$/, '');
 }
 
@@ -306,7 +306,7 @@ export default function App() {
             <Section
               title="Upload Your Resume, And Get Smart Recommendations"
               subtitle="The resume is parsed, scored, and mapped to a suggested field, skills, courses, and interview prompts."
-              action={<div className="score-badge">ATS {atsScore}%</div>}
+              action={<div className="score-badge"><span>ATS Score</span><strong>{atsScore}%</strong></div>}
             >
               <div className="form-grid">
                 <label className="field">
